@@ -1,0 +1,26 @@
+<html>
+
+<head>
+    Aurora Home
+</head>
+
+<body>
+    <h2>Welcome to Aurora</h2>
+    <input type="text" placeholder="Enter username" id="user" /><br>
+    <input type="password" placeholder="Enter Password" id="pass" /><br>
+    <button id="connect">Connect</button>
+</body>
+
+<script>
+    const $ = require('jquery')
+    const { ipcRenderer } = require('electron')
+
+    $("#connect").click(() => {
+        let username = $('#user').val()
+        let passphrase = $("#pass").val()
+        
+        ipcRenderer.send('connect', [username, passphrase])
+    })
+</script>
+
+</html>

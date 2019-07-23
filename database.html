@@ -1,0 +1,36 @@
+<html>
+    <head>
+        <title>Databases List</title>
+        <style>
+            ul{
+                list-style-type: none;
+            }
+            li{
+                font-size : 18px;
+                letter-spacing: 1px;
+                padding : 5px 0px 5px 10px;
+                border: solid 1px lightgrey;
+            }
+        </style>
+    </head>
+    <body>
+        <ul id="database_list">
+        </ul>
+    </body>
+    <script>
+        const $ = require('jquery')
+        const { ipcRenderer } = require('electron')
+        
+        const databases = ipcRenderer.sendSync('getDatabases')
+        console.log(databases)
+        databases.forEach(element => {
+            let li = document.createElement('li')
+            li.textContent = element
+            $("#database_list").append($(li))
+        });
+
+        $('li').click(function(){
+            ipcRenderer.send('gotoDatabase',$(this).html())
+        })
+    </script>
+</html>
