@@ -22,6 +22,9 @@ app.on('ready',() => {
 })
 
 ipcMain.on('connect', (event,args)=>{
+
+    console.log(args)
+
     connection = mysql.createConnection({
         user: args[0],
         password: args[1],
@@ -38,6 +41,9 @@ ipcMain.on('gotoDatabase', (event,args)=>{
     window.loadFile('tables.html')
 })
 
+ipcMain.on('goBacktoDatabases', (event, args) => {
+    window.loadFile('database.html')
+})
 
 ipcMain.on('getDatabases', (event) => {
     connection.query('show databases', (error,results,fields) => {
@@ -64,4 +70,12 @@ ipcMain.on('getTables',(event)=>{
 ipcMain.on('gotoTables', (event,args) => {
     table = args
     window.loadFile('data.html')
+})
+
+ipcMain.on('goHome', (event,args) => {
+    window.loadFile('home.html')
+})
+
+ipcMain.on('create-database', (event,dbName) => {
+    connection.query('create database ' + dbName)
 })

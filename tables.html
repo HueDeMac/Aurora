@@ -1,35 +1,79 @@
 <html>
-    <head>
-        <title>Tables List</title>
-        <style>
-            ul{
-                list-style-type: none;
-            }
-            li{
-                font-size : 18px;
-                letter-spacing: 1px;
-                padding : 5px 0px 5px 10px;
-                border: solid 1px lightgrey;
-            }
-        </style>
-    </head>
-    <body>
-        <ul id="table_list">
-        </ul>
-    </body>
+
+<head>
+    <title>Tables List</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
+        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link href="node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
     <script>
-        const $ = require('jquery')
-        const { ipcRenderer } = require('electron')
-        
-        ipcRenderer.sendSync('getTables').forEach(element => {
-            console.log(element)
+        window.$ = window.jQuery = require('jquery')
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <style>
+        ul {
+            list-style-type: none;
+        }
+
+        li {
+            font-size: 18px;
+            letter-spacing: 1px;
+            padding: 5px 0px 5px 10px;
+            border: solid 1px lightgrey;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-12">
+                <button class="btn btn-primary" id="back-button">
+                    Go Back
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5 d-none" id="not-found">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h4>No Tables Exists</h4>
+            </div>
+        </div>
+    </div>
+
+    <ul id="table_list">
+    </ul>
+</body>
+<script>
+    const { ipcRenderer } = require('electron')
+
+    const tables = ipcRenderer.sendSync('getTables')
+
+    if (tables.length > 0) {
+        tables.forEach(element => {
+
             let li = document.createElement('li')
             li.textContent = element
             $("#table_list").append($(li))
         });
+    } else {
+        $('#not-found').removeClass('d-none')
+    }
 
-        $('li').click(function(){
-            ipcRenderer.send('gotoTable',$(this).html())
-        })
-    </script>
+    $('li').click(function () {
+        ipcRenderer.send('gotoTable', $(this).html())
+    })
+
+    $('#back-button').click(() => {
+        ipcRenderer.send('goBacktoDatabases', '')
+    })
+
+</script>
+
 </html>
