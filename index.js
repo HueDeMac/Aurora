@@ -1,52 +1,77 @@
-const { BrowserWindow , app, ipcMain }  = require('electron')
+const {BrowserWindow, app, ipcMain} = require('electron')
+const {Config} = require('./lib/Config')
 const mysql = require('mysql')
 
 require('electron-reload')(__dirname)
 
 let window = null
 let connection = null
-
 let database = null
 let table = null
+const config = new Config();
 
-app.on('ready',() => {
+
+const connect = (creds) => {
+    const tempConnection = mysql.createConnection({
+        user: creds.username,
+        password: creds.password,
+        port: 3306,
+        host: 'localhost'
+    })
+    tempConnection.connect()
+    return tempConnection
+}
+
+
+app.on('ready', () => {
     window = new BrowserWindow({
-        width : 1000,
-        height : 800,
+        width: 1000,
+        height: 800,
         webPreferences: {
             nodeIntegration: true
         }
     })
 
-    window.loadFile('home.html')
+    if (config.exists('username') && config.exists('password')) {
+
+        console.log('USER CREDS EXISTS')
+
+        connection = connect({
+            username: config.get('username'),
+            password: config.get('password')
+        })
+        window.loadFile('database.html')
+    } else {
+        console.log('USER CREDS DOES NOT EXISTS')
+        window.loadFile('home.html')
+    }
 })
 
-ipcMain.on('connect', (event,args)=>{
 
-    console.log(args)
-
-    connection = mysql.createConnection({
-        user: args[0],
-        password: args[1],
-        port: 3306,
-        host: 'localhost'
+ipcMain.on('connect', (event, args) => {
+    config.set('username', args[0])
+    config.set('password', args[1])
+    connection = connect({
+        username: config.get('username'),
+        password: config.get('password')
     })
-    connection.connect()
     window.loadFile('database.html')
 })
 
 
-ipcMain.on('gotoDatabase', (event,args)=>{
+ipcMain.on('gotoDatabase', (event, args) => {
     database = args
     window.loadFile('tables.html')
 })
+
 
 ipcMain.on('goBacktoDatabases', (event, args) => {
     window.loadFile('database.html')
 })
 
+
 ipcMain.on('getDatabases', (event) => {
-    connection.query('show databases', (error,results,fields) => {
+    connection.query('show databases', (error, results, fields) => {
         if (error) throw error
         let databases = []
         results.forEach(element => {
@@ -56,9 +81,10 @@ ipcMain.on('getDatabases', (event) => {
     })
 })
 
-ipcMain.on('getTables',(event)=>{
-    connection.query('show tables in ' + database,(error,results,fields)=>{
-        if(error) throw error
+
+ipcMain.on('getTables', (event) => {
+    connection.query('show tables in ' + database, (error, results, fields) => {
+        if (error) throw error
         let tables = []
         results.forEach(element => {
             tables.push(element[fields[0].name])
@@ -67,15 +93,25 @@ ipcMain.on('getTables',(event)=>{
     })
 })
 
-ipcMain.on('gotoTables', (event,args) => {
+
+ipcMain.on('gotoTables', (event, args) => {
     table = args
     window.loadFile('data.html')
 })
 
-ipcMain.on('goHome', (event,args) => {
+
+ipcMain.on('goHome', (event, args) => {
     window.loadFile('home.html')
 })
 
-ipcMain.on('create-database', (event,dbName) => {
-    connection.query('create database ' + dbName)
+ipcMain.on('create-database', (event, dbName) => {
+    connection.query('create database ' + dbName, () => {
+        event.sender.send('database-updated')
+    })
+})
+
+ipcMain.on('delete-database', (event, dbname) => {
+    connection.query('drop database ' + dbname, () => {
+        event.sender.send('database-updated')
+    })
 })

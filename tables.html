@@ -3,76 +3,109 @@
 <head>
     <title>Tables List</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
-        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
-    <link href="node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+          integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link href="node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet"/>
     <script>
         window.$ = window.jQuery = require('jquery')
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-        crossorigin="anonymous"></script>
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-        crossorigin="anonymous"></script>
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
     <style>
-        ul {
-            list-style-type: none;
+
+        .create i {
+            font-size: 35px;
+            cursor: pointer;
+            color: #6c757d;
         }
 
-        li {
-            font-size: 18px;
-            letter-spacing: 1px;
-            padding: 5px 0px 5px 10px;
-            border: solid 1px lightgrey;
+        .create:focus {
+            outline: none;
+            box-shadow: none;
+            border: none;
+        }
+
+        .create i:hover {
+            color: #28a745;
         }
     </style>
 </head>
 
 <body>
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-12">
-                <button class="btn btn-primary" id="back-button">
-                    Go Back
-                </button>
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <button class="btn btn-primary" id="back-button">
+                Go Back
+            </button>
+
+            <button data-toggle="modal" class="border-0 mb-3 bg-transparent create"
+                    data-target="#createDatabaseModal">
+                <i class="fa fa-plus-circle" title="Create Table"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-5 d-none" id="not-found">
+    <div class="row">
+        <div class="col-12 text-center">
+            <h4>No Tables Exists</h4>
+        </div>
+    </div>
+</div>
+
+<div class="container" id="table-list">
+</div>
+
+
+<template id="row-template">
+    <div class="row">
+        <div class="col-12 mb-2 d-flex align-items-center justify-content-between">
+            <div class="table border py-2 px-2">
+                <span class="name"></span>
+                <i class="fa fa-trash-alt float-right delete"></i>
             </div>
         </div>
     </div>
-
-    <div class="container mt-5 d-none" id="not-found">
-        <div class="row">
-            <div class="col-12 text-center">
-                <h4>No Tables Exists</h4>
-            </div>
-        </div>
-    </div>
-
-    <ul id="table_list">
-    </ul>
+</template>
 </body>
 <script>
-    const { ipcRenderer } = require('electron')
+    const {ipcRenderer} = require('electron')
 
-    const tables = ipcRenderer.sendSync('getTables')
+    const rowTemplate = document.getElementById('row-template')
 
-    if (tables.length > 0) {
-        tables.forEach(element => {
+    refreshTables()
 
-            let li = document.createElement('li')
-            li.textContent = element
-            $("#table_list").append($(li))
-        });
-    } else {
-        $('#not-found').removeClass('d-none')
-    }
-
-    $('li').click(function () {
-        ipcRenderer.send('gotoTable', $(this).html())
-    })
-
-    $('#back-button').click(() => {
+    $('#back-button').on('click', () => {
         ipcRenderer.send('goBacktoDatabases', '')
     })
+
+    function refreshTables() {
+        const tables = ipcRenderer.sendSync('getTables')
+        $("#table-list").html('')
+
+        if (tables.length > 0) {
+            tables.forEach(element => {
+                var row = rowTemplate.content.cloneNode(true)
+                $(row).find('.name').text(element)
+                $(row).find('.delete').on('click', (event) => {
+                    event.stopPropagation()
+                    // deleteDatabase(element)
+                })
+                $("#table-list").append($(row))
+            })
+        } else {
+            $('#not-found').removeClass('d-none')
+        }
+
+        $('.table').on('click', (event) => {
+            ipcRenderer.send('gotoTable', $(event.target).text().trim())
+        })
+    }
 
 </script>
 

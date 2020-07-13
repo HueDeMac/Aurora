@@ -3,17 +3,17 @@
 <head>
     <title>Databases List</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.2/css/all.css"
-        integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
-    <link href="node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+          integrity="sha384-oS3vJWv+0UjzBfQzYUhtDYW+Pj2yciDJxpsK1OYPAYjqT085Qq/1cq5FLXAZQ7Ay" crossorigin="anonymous">
+    <link href="node_modules/bootstrap/dist/css/bootstrap.css" rel="stylesheet"/>
     <script>
         window.$ = window.jQuery = require('jquery')
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-        crossorigin="anonymous"></script>
+            integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+            crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-        crossorigin="anonymous"></script>
+            integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            crossorigin="anonymous"></script>
     <style>
         .database {
             cursor: pointer;
@@ -21,80 +21,113 @@
         }
 
         .create {
-            font-size: 20px;
-            color: green;
-            margin-bottom: 20px;
+
+        }
+
+        .create i {
+            font-size: 35px;
             cursor: pointer;
+            color: #6c757d;
+        }
+
+        .create:focus {
+            outline: none;
+            box-shadow: none;
+            border: none;
+        }
+
+        .create i:hover {
+            color: #28a745;
+        }
+
+        .database .delete {
+            display: none;
+            color: #6c757d;
+        }
+
+        .database:hover .delete {
+            display: block;
+        }
+
+        .database .delete:hover {
+            color: #dc3545;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container mt-5">
+<div class="container mt-5">
 
-        <div class="row">
-            <div class="col-12 px-0">
-                <h3>Databases: </h3>
-            </div>
+    <div class="row">
+        <div class="col-12 px-0">
+            <h3>Databases: </h3>
         </div>
-        <div class="row">
-            <div class="col-12">
-                <button data-toggle="modal" class="float-right border-0" data-target="#createDatabaseModal">
-                    <i class="fa fa-folder-plus create"></i>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <button data-toggle="modal" class="float-right border-0 mb-3 bg-transparent create"
+                    data-target="#createDatabaseModal">
+                <i class="fa fa-folder-plus" title="Create Database"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="container" id="database-list">
+
+</div>
+
+
+<template id="row-template">
+    <div class="row database border mb-2 py-2">
+        <div class="col-12 d-flex align-items-center justify-content-between">
+            <span class="name"></span>
+            <i class="fa fa-trash-alt float-right delete"></i>
+        </div>
+    </div>
+</template>
+
+<div class="modal fade" id="createDatabaseModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Create Database</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-        </div>
-    </div>
-
-    <div class="container" id="database-list">
-
-    </div>
-
-
-    <template id="row-template">
-        <div class="row database border mb-2 py-2">
-            <div class="col-12 name">
-
+            <div class="modal-body py-5">
+                <input type="text" id="db-name" class="form-control" placeholder="Enter Database Name"/>
             </div>
-        </div>
-    </template>
-
-    <div class="modal fade" id="createDatabaseModal" tabindex="-1" role="dialog" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLongTitle">Create Database</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body py-5">
-                    <input type="text" id="db-name" class="form-control" placeholder="Enter Database Name" />
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="create">Submit</button>
-                </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="create">Submit</button>
             </div>
         </div>
     </div>
+</div>
 </body>
 <script>
-    const { ipcRenderer } = require('electron')
+    const {ipcRenderer} = require('electron')
 
-    var rowTemplate = document.getElementById('row-template')
+    const rowTemplate = document.getElementById('row-template')
 
     refreshDatabases()
 
-    $('.database').click((event) => {
-        ipcRenderer.send('gotoDatabase', $(event.target).text().trim())
+    ipcRenderer.on('database-updated', () => {
+        refreshDatabases()
     })
 
-    $('#create').click((event) => {
-        ipcRenderer.sendSync('create-database', $('#db-name').val())
+    function deleteDatabase(dbname) {
+        ipcRenderer.send('delete-database', dbname)
+    }
+
+    $('#create').on('click', (event) => {
+        const dbname = $('#db-name').val()
+        $('#db-name').val('')
         $('#createDatabaseModal').modal('hide')
-        refreshDatabases()
+        ipcRenderer.send('create-database', dbname)
     })
 
     function refreshDatabases() {
@@ -104,7 +137,15 @@
         databases.forEach(element => {
             var row = rowTemplate.content.cloneNode(true)
             $(row).find('.name').text(element)
+            $(row).find('.delete').on('click', (event) => {
+                event.stopPropagation()
+                deleteDatabase(element)
+            })
             $("#database-list").append($(row))
+        })
+
+        $('.database').on('click', (event) => {
+            ipcRenderer.send('gotoDatabase', $(event.target).text().trim())
         })
     }
 
